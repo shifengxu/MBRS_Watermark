@@ -3,7 +3,7 @@
   "model_epoch": 42,
   "with_diffusion": false,
   "strength_factor": 1,
-  "dataset_path": "../datasets/",
+  "dataset_path": "../download_datasets/test_images_doc/",
   "H": 256,
   "W": 256,
   "message_length": 256,
