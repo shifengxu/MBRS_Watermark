@@ -29,7 +29,6 @@ class Network:
 		self.label_encoded = torch.full((batch_size, 1), 0, dtype=torch.float, device=device)
 
 		# optimizer
-		print(lr)
 		self.opt_encoder_decoder = torch.optim.Adam(
 			filter(lambda p: p.requires_grad, self.encoder_decoder.parameters()), lr=lr)
 		self.opt_discriminator = torch.optim.Adam(self.discriminator.parameters(), lr=lr)
