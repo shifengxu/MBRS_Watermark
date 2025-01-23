@@ -45,7 +45,7 @@ saved_all = None
 print(f"saved_iterations: {saved_iterations}")
 
 num = 0
-b_cnt = len(test_dataset)
+b_cnt = len(test_dataloader)
 network.encoder_decoder.eval()
 network.discriminator.eval()
 start_time = time.time()
@@ -92,8 +92,8 @@ for b_idx, images in enumerate(test_dataloader):
         psnr       = test_result_sum["psnr"] / num
         ssim       = test_result_sum["ssim"] / num
         elp, eta = get_time_ttl_and_eta(start_time, b_idx+1, b_cnt)
-        msg = (f"{b_idx:03d}/{b_cnt}: error_rate:{error_rate:.6f}, psnr:{psnr:10.6f}, ssim:{ssim:.6f}. "
-               f"elp: {elp}, eta: {eta}")
+        msg = (f"B{b_idx:03d}/{b_cnt}: error_rate:{error_rate:.6f}, psnr:{psnr:10.6f}, ssim:{ssim:.6f}. "
+               f"elp:{elp}, eta:{eta}")
         print(msg)
         with open(test_log, "a") as file:
             file.write(msg)
