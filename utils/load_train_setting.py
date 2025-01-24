@@ -5,14 +5,18 @@ import time
 '''
 params setting
 '''
+cur_dir = os.path.dirname(__file__)
+parent_dir = os.path.dirname(cur_dir)
+filename = os.path.join(parent_dir, "train_settings.json")
 settings = JsonConfig()
-settings.load_json_file("train_settings.json")
+settings.load_json_file(filename)
 
 with_diffusion = settings.with_diffusion
 only_decoder = settings.only_decoder
 
 project_name = settings.project_name
 dataset_path = settings.dataset_path
+val_dataset_path = settings.val_dataset_path
 epoch_number = settings.epoch_number
 batch_size = settings.batch_size
 train_continue = settings.train_continue
@@ -27,12 +31,12 @@ noise_layers = settings.noise_layers
 file preparing
 '''
 full_project_name = project_name + "_m" + str(message_length)
-for noise in noise_layers:
-	full_project_name += "_" + noise
+# for noise in noise_layers:
+# 	full_project_name += "_" + noise
 result_folder = "results/" + time.strftime(full_project_name + "__%Y_%m_%d__%H_%M_%S", time.localtime()) + "/"
-if not os.path.exists(result_folder): os.mkdir(result_folder)
-if not os.path.exists(result_folder + "images/"): os.mkdir(result_folder + "images/")
-if not os.path.exists(result_folder + "models/"): os.mkdir(result_folder + "models/")
+if not os.path.exists(result_folder): os.makedirs(result_folder)
+if not os.path.exists(result_folder + "images/"): os.makedirs(result_folder + "images/")
+if not os.path.exists(result_folder + "models/"): os.makedirs(result_folder + "models/")
 with open(result_folder + "/train_params.txt", "w") as file:
 	content = "-----------------------" + time.strftime("Date: %Y/%m/%d %H:%M:%S",
 														time.localtime()) + "-----------------------\n"

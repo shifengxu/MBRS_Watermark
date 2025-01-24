@@ -10,28 +10,58 @@ from torch.utils.data import Dataset
 
 class MBRSDataset(Dataset):
 
-    def __init__(self, path, H=256, W=256):
+    def __init__(self, path, H=256, W=256, transform_type=None, data_file_layout=None):
         super(MBRSDataset, self).__init__()
         self.H = H
         self.W = W
         self.path = path
+        self.transform_type = transform_type
+        self.data_file_layout = data_file_layout
         print(f"MBRSDataset::__init__()...")
         print(f"  H, W: {self.H}, W: {self.W}")
         print(f"  path: {self.path}")
-        # full_path_list = self.get_file_list_literally_from_sub_dir()
+        print(f"  data_file_layout: {self.data_file_layout}")
+        print(f"  transform_type  : {self.transform_type}")
         # sub_path_list = self.get_file_list_from_meta_files(self.path)
-        file_name_list = os.listdir(self.path)
-        file_name_list = [f for f in file_name_list if f.endswith('.png')]
+        if data_file_layout == 'sub_dirs':
+            file_name_list = self.get_file_list_literally_from_sub_dir()
+        elif data_file_layout is None:
+            file_name_list = os.listdir(self.path)
+            file_name_list = [f for f in file_name_list if f.endswith('.png')]
+        else:
+            raise ValueError(f"Invalid data_file_layout: {data_file_layout}")
         file_name_list.sort()
-
         print(f"  total file cnt: {len(file_name_list)}")
         self.list = file_name_list
-        self.transform = transforms.Compose([
-            transforms.Resize((int(self.H * 1.1), int(self.W * 1.1))),
-            transforms.RandomCrop((self.H, self.W)),
-            transforms.ToTensor(),
-            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
-        ])
+        if self.transform_type  == 2:
+            tf_cnt = 100
+            arr = []
+            for p in np.linspace(0.7, 1.4, tf_cnt, endpoint=True):
+                tf = transforms.Compose([
+                        transforms.RandomCrop((int(H*p), int(W*p))),
+                        transforms.Resize((H, W)),
+                        transforms.ToTensor(),
+                        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+                    ])
+                arr.append(tf)
+            self.transform_arr = arr
+            self.transform_arr_len = len(arr)
+            print(f"  transform_arr_len: {self.transform_arr_len}")
+        elif self.transform_type == 1:
+            self.transform = transforms.Compose([
+                        transforms.RandomCrop((H, W)),
+                        transforms.ToTensor(),
+                        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+            ])
+        elif self.transform_type is None:
+            self.transform = transforms.Compose([
+                transforms.Resize((int(self.H * 1.1), int(self.W * 1.1))),
+                transforms.RandomCrop((self.H, self.W)),
+                transforms.ToTensor(),
+                transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+            ])
+        else:
+            raise ValueError(f"Invalid transform_type: {self.transform_type}")
         print(f"MBRSDataset::__init__()...Done")
 
     def get_file_list_from_meta_files(self, path):
@@ -60,17 +90,17 @@ class MBRSDataset(Dataset):
     def get_file_list_literally_from_sub_dir(self):
         sub_dir_arr = [f"pdfa-eng-train-{i:04d}" for i in range(0, 11)]
         print(f"  sub_path cnt: {len(sub_dir_arr)}")
-        list = []
+        sub_path_list = []
         for sub_dir in sub_dir_arr:
             full_dir = os.path.join(self.path, sub_dir)
             file_name_list = os.listdir(full_dir)
             print(f"  {sub_dir}: {len(file_name_list)}")
             for file_name in file_name_list:
-                file_full_path = os.path.join(full_dir, file_name)
-                list.append(file_full_path)
+                sub_path = os.path.join(sub_dir, file_name)
+                sub_path_list.append(sub_path)
             # for
         # for
-        return list
+        return sub_path_list
 
     def transform_image(self, image):
         # ignore
@@ -85,13 +115,13 @@ class MBRSDataset(Dataset):
         return image
 
     def __getitem__(self, index):
-        while True:
-            image = Image.open(os.path.join(self.path, self.list[index])).convert("RGB")
-            image = self.transform_image(image)
-            if image is not None:
-                return image
-            # print("dataloader : skip index", index)
-            index += 1
+        if self.transform_type == 2:
+            transform_image = self.transform_arr[index % self.transform_arr_len]
+        else:
+            transform_image = self.transform
+        image = Image.open(os.path.join(self.path, self.list[index])).convert("RGB")
+        image = transform_image(image)
+        return image
 
     def __len__(self):
         return len(self.list)
