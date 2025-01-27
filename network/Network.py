@@ -5,7 +5,7 @@ from .Discriminator import Discriminator
 class Network:
 
 	def __init__(self, H, W, message_length, noise_layers, device, batch_size, lr, with_diffusion=False,
-				 only_decoder=False):
+				 only_decoder=False, gpu_ids=None):
 		# device
 		self.device = device
 
@@ -17,8 +17,8 @@ class Network:
 
 		self.discriminator = Discriminator().to(device)
 
-		self.encoder_decoder = torch.nn.DataParallel(self.encoder_decoder)
-		self.discriminator = torch.nn.DataParallel(self.discriminator)
+		self.encoder_decoder = torch.nn.DataParallel(self.encoder_decoder, device_ids=gpu_ids)
+		self.discriminator = torch.nn.DataParallel(self.discriminator, device_ids=gpu_ids)
 
 		if only_decoder:
 			for p in self.encoder_decoder.module.encoder.parameters():

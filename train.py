@@ -1,5 +1,24 @@
 import time
+import torch
 
+def parse_args():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--H", type=int, default=256)
+    parser.add_argument("--W", type=int, default=256)
+    parser.add_argument("--message_length", type=int, default=30)
+    parser.add_argument("--epoch_number", type=int, default=10)
+    parser.add_argument("--batch_size", type=int, default=10)
+    parser.add_argument('--gpu_ids', nargs='+', type=int, default=[0])
+
+    a = parser.parse_args()
+    g = a.gpu_ids
+    d = torch.device(f"cuda:{g[0]}") if torch.cuda.is_available() and g else torch.device("cpu")
+    a.device = d
+    return a
+
+args = parse_args()
+device = args.device
 print(f"from torch.utils.data import DataLoader")
 from torch.utils.data import DataLoader
 print(f"from utils import *")
@@ -10,11 +29,26 @@ from network.Network import *
 from utils.load_train_setting import *
 from utils.helper import get_time_ttl_and_eta
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+if H != args.H:
+    print(f"Change from json to args H: {H} -> {args.H}")
+    H = args.H
+if W != args.W:
+    print(f"Change from json to args W: {W} -> {args.W}")
+    W = args.W
+if message_length != args.message_length:
+    print(f"Change from json to args message_length: {message_length} -> {args.message_length}")
+    message_length = args.message_length
+if epoch_number != args.epoch_number:
+    print(f"Change from json to args epoch_number: {epoch_number} -> {args.epoch_number}")
+    epoch_number = args.epoch_number
+if batch_size != args.batch_size:
+    print(f"Change from json to args batch_size: {batch_size} -> {args.batch_size}")
+    batch_size = args.batch_size
 
 print(f"cwd            : {os.getcwd()}")
 print(f"pid            : {os.getpid()}")
 print(f"host           : {os.uname().nodename}")
+print(f"gpu_ids        : {args.gpu_ids}")
 print(f"device         : {device}")
 print(f"batch_size     : {batch_size}")
 print(f"with_diffusion : {with_diffusion}")
@@ -23,7 +57,9 @@ print(f"network W      : {W}")
 print(f"network lr     : {lr}")
 print(f"message_length : {message_length}")
 print(f"only_decoder   : {only_decoder}")
-network = Network(H, W, message_length, noise_layers, device, batch_size, lr, with_diffusion, only_decoder)
+print(f"epoch_number   : {epoch_number}")
+network = Network(H, W, message_length, noise_layers, device, batch_size,
+                  lr, with_diffusion, only_decoder, gpu_ids=args.gpu_ids)
 
 print(f"dataset_path     : {dataset_path}")
 print(f"val_dataset_path : {val_dataset_path}")
@@ -68,7 +104,7 @@ for epoch in range(epoch_number):
             psnr = running_result_sum["psnr"] / (b_idx + 1)
             ssim = running_result_sum["ssim"] / (b_idx + 1)
             elp, eta = get_time_ttl_and_eta(training_start_time, batch_iter, batch_total)
-            print(f"E{epoch:03d} B{b_idx:03d}/{b_cnt}: error_rate:{err:.4f}, psnr:{psnr:8.4f}, ssim:{ssim:7.4f}."
+            print(f"E{epoch:03d} B{b_idx:03d}/{b_cnt}: error_rate:{err:.8f}, psnr:{psnr:8.4f}, ssim:{ssim:7.4f}."
                   f" elp:{elp}, eta:{eta}")
         # if
     # for batch

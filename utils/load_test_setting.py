@@ -22,11 +22,12 @@ H, W, message_length = settings.H, settings.W, settings.message_length
 noise_layers = settings.noise_layers
 
 result_folder = os.path.join(parent_dir, "results", settings.result_folder)
-test_base = "/test_"
-for layer in settings.noise_layers:
-	test_base += layer + "_"
-test_param = result_folder + test_base + "s{}_params.json".format(strength_factor)
-test_log = result_folder + test_base + "s{}_log.txt".format(strength_factor)
+os.makedirs(result_folder, exist_ok=True)
+test_base = "test_"
+# for layer in settings.noise_layers:
+# 	test_base += layer + "_"
+test_param = os.path.join(result_folder, f"{test_base}{strength_factor}_params.json")
+test_log   = os.path.join(result_folder, f"{test_base}{strength_factor}_log.txt")
 with open(test_param, "w") as file:
 	content = ""
 	for item in settings.get_items():

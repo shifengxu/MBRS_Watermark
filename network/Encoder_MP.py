@@ -1,5 +1,5 @@
 from . import *
-
+import torch
 
 class Encoder_MP(nn.Module):
 	'''
@@ -17,11 +17,20 @@ class Encoder_MP(nn.Module):
 		self.image_pre_layer = ConvBNRelu(3, channels)
 		self.image_first_layer = SENet(channels, channels, blocks=blocks)
 
-		self.message_pre_layer = nn.Sequential(
-			ConvBNRelu(1, channels),
-			ExpandNet(channels, channels, blocks=message_convT_blocks),
-			SENet(channels, channels, blocks=message_se_blocks),
-		)
+		if message_length == 30:    # handle special case
+			self.message_pre_layer = nn.Sequential(
+				ConvBNRelu(1, channels),
+				torch.nn.ConstantPad2d((1, 1, 2, 1), 0),
+				ExpandNet(channels, channels, blocks=message_convT_blocks),
+				SENet(channels, channels, blocks=message_se_blocks),
+			)
+			print(f"Encoder_MP::__init__(): handle special case for message_length={message_length}")
+		else:
+			self.message_pre_layer = nn.Sequential(
+				ConvBNRelu(1, channels),
+				ExpandNet(channels, channels, blocks=message_convT_blocks),
+				SENet(channels, channels, blocks=message_se_blocks),
+			)
 
 		self.message_first_layer = SENet(channels, channels, blocks=blocks)
 
@@ -35,8 +44,12 @@ class Encoder_MP(nn.Module):
 		intermediate1 = self.image_first_layer(image_pre)
 
 		# Message Processor
-		size = int(np.sqrt(message.shape[1]))
-		message_image = message.view(-1, 1, size, size)
+		msg_length = message.shape[1]
+		if msg_length == 30: # handle special case
+			message_image = message.view(-1, 1, 5, 6)  # hard code
+		else:
+			size = int(np.sqrt(msg_length))
+			message_image = message.view(-1, 1, size, size)
 		message_pre = self.message_pre_layer(message_image)
 		intermediate2 = self.message_first_layer(message_pre)
 

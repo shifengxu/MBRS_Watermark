@@ -60,6 +60,7 @@ def save_images(saved_all, epoch, folder, resize_to=None):
 
 	saved_image = Image.fromarray(np.array(stacked_images, dtype=np.uint8)).convert("RGB")
 	saved_image.save(filename)
+	return filename
 
 
 def get_random_images(images, encoded_images, noised_images):

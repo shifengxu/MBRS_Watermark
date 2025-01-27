@@ -18,7 +18,7 @@ class MBRSDataset(Dataset):
         self.transform_type = transform_type
         self.data_file_layout = data_file_layout
         print(f"MBRSDataset::__init__()...")
-        print(f"  H, W: {self.H}, W: {self.W}")
+        print(f"  H, W: {self.H}, {self.W}")
         print(f"  path: {self.path}")
         print(f"  data_file_layout: {self.data_file_layout}")
         print(f"  transform_type  : {self.transform_type}")

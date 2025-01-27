@@ -12,11 +12,21 @@ class Decoder(nn.Module):
 		stride_blocks = int(np.log2(H // int(np.sqrt(message_length))))
 		keep_blocks = max(blocks - stride_blocks, 0)
 
-		self.first_layers = nn.Sequential(
-			ConvBNRelu(3, channels),
-			SENet_decoder(channels, channels, blocks=stride_blocks + 1),
-			ConvBNRelu(channels * (2 ** stride_blocks), channels),
-		)
+		if message_length == 30:    # handle special case
+			self.first_layers = nn.Sequential(
+				ConvBNRelu(3, channels),
+				SENet_decoder(channels, channels, blocks=stride_blocks + 1),
+				ConvBNRelu(channels * (2 ** stride_blocks), channels, padding=0),
+				torch.nn.ConstantPad2d([1, 1, 1, 0], 0),
+				ConvBNRelu(channels, channels, padding=0),
+			)
+			print(f"Decoder::__init__(): handle special case for message_length={message_length}")
+		else:
+			self.first_layers = nn.Sequential(
+				ConvBNRelu(3, channels),
+				SENet_decoder(channels, channels, blocks=stride_blocks + 1),
+				ConvBNRelu(channels * (2 ** stride_blocks), channels),
+			)
 		self.keep_layers = SENet(channels, channels, blocks=keep_blocks)
 
 		self.final_layer = ConvBNRelu(channels, 1)
