@@ -10,18 +10,20 @@ from torch.utils.data import Dataset
 
 class MBRSDataset(Dataset):
 
-    def __init__(self, path, H=256, W=256, transform_type=None, data_file_layout=None):
+    def __init__(self, path, H=256, W=256, transform_type=1, data_file_layout=None, return_ori_img=False):
         super(MBRSDataset, self).__init__()
         self.H = H
         self.W = W
         self.path = path
         self.transform_type = transform_type
         self.data_file_layout = data_file_layout
+        self.return_ori_img = return_ori_img
         print(f"MBRSDataset::__init__()...")
         print(f"  H, W: {self.H}, {self.W}")
         print(f"  path: {self.path}")
         print(f"  data_file_layout: {self.data_file_layout}")
         print(f"  transform_type  : {self.transform_type}")
+        print(f"  return_ori_img  : {self.return_ori_img}")
         # sub_path_list = self.get_file_list_from_meta_files(self.path)
         if data_file_layout == 'sub_dirs':
             file_name_list = self.get_file_list_literally_from_sub_dir()
@@ -34,11 +36,12 @@ class MBRSDataset(Dataset):
         print(f"  total file cnt: {len(file_name_list)}")
         self.list = file_name_list
         if self.transform_type  == 2:
+            # obsolete. just keep for possible usage in the future.
             tf_cnt = 100
             arr = []
             for p in np.linspace(0.7, 1.4, tf_cnt, endpoint=True):
                 tf = transforms.Compose([
-                        transforms.RandomCrop((int(H*p), int(W*p))),
+                        # transforms.RandomCrop((int(H*p), int(W*p))),
                         transforms.Resize((H, W)),
                         transforms.ToTensor(),
                         transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
@@ -48,8 +51,9 @@ class MBRSDataset(Dataset):
             self.transform_arr_len = len(arr)
             print(f"  transform_arr_len: {self.transform_arr_len}")
         elif self.transform_type == 1:
+            # training & testing both use this transform.
             self.transform = transforms.Compose([
-                        transforms.RandomCrop((H, W)),
+                        transforms.Resize((H, W)),
                         transforms.ToTensor(),
                         transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
             ])
@@ -62,6 +66,10 @@ class MBRSDataset(Dataset):
             ])
         else:
             raise ValueError(f"Invalid transform_type: {self.transform_type}")
+        self.transform_ori_img = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+        ])
         print(f"MBRSDataset::__init__()...Done")
 
     def get_file_list_from_meta_files(self, path):
@@ -102,26 +110,18 @@ class MBRSDataset(Dataset):
         # for
         return sub_path_list
 
-    def transform_image(self, image):
-        # ignore
-        if image.size[0] < self.W / 2 and image.size[1] < self.H / 2:
-            return None
-        if image.size[0] < image.size[1] / 2 or image.size[1] < image.size[0] / 2:
-            return None
-
-        # Augment, ToTensor and Normalize
-        image = self.transform(image)
-
-        return image
-
     def __getitem__(self, index):
         if self.transform_type == 2:
-            transform_image = self.transform_arr[index % self.transform_arr_len]
+            transform_fn = self.transform_arr[np.random.randint(0, self.transform_arr_len)]
         else:
-            transform_image = self.transform
+            transform_fn = self.transform
         image = Image.open(os.path.join(self.path, self.list[index])).convert("RGB")
-        image = transform_image(image)
-        return image
+        new_image = transform_fn(image)
+        if not self.return_ori_img:
+            return new_image
+
+        ori_image = self.transform_ori_img(image)
+        return new_image, ori_image
 
     def __len__(self):
         return len(self.list)
