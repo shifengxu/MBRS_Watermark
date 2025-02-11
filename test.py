@@ -2,6 +2,7 @@ import datetime
 
 def parse_args():
     import argparse
+    import torch
     parser = argparse.ArgumentParser()
     parser.add_argument("--H", type=int, default=256)
     parser.add_argument("--W", type=int, default=256)

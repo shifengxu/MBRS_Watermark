@@ -33,7 +33,7 @@ file preparing
 full_project_name = project_name + "_m" + str(message_length)
 # for noise in noise_layers:
 # 	full_project_name += "_" + noise
-result_folder = "results/" + time.strftime(full_project_name + "__%Y_%m_%d__%H_%M_%S", time.localtime()) + "/"
+result_folder = "results/" + full_project_name + "/"
 if not os.path.exists(result_folder): os.makedirs(result_folder)
 if not os.path.exists(result_folder + "images/"): os.makedirs(result_folder + "images/")
 if not os.path.exists(result_folder + "models/"): os.makedirs(result_folder + "models/")

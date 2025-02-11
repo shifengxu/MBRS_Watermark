@@ -79,7 +79,7 @@ training_start_time = time.time()
 b_cnt = len(train_dataloader)
 batch_total = epoch_number * b_cnt
 batch_iter = 0
-for epoch in range(epoch_number):
+for epoch in range(1, epoch_number+1):
     epoch += train_continue_epoch if train_continue else 0
     running_result_sum = {}
     cur_epoch_start_time = time.time()
@@ -117,7 +117,7 @@ for epoch in range(epoch_number):
         file.write(content)
     print(content)
 
-    if epoch % 5 == 0 or epoch == epoch_number - 1:
+    if epoch % 5 == 0 or epoch == epoch_number:
         path_model = result_folder + "models/"
         path_encoder_decoder = path_model + f"EC_{epoch:03d}.pth"
         path_discriminator = path_model + f"D_{epoch:03d}.pth"
