@@ -13,7 +13,7 @@ settings.load_json_file(filename)
 
 with_diffusion = settings.with_diffusion
 
-dataset_path = settings.dataset_path
+# dataset_path = settings.dataset_path
 model_epoch = settings.model_epoch
 strength_factor = settings.strength_factor
 save_images_number = settings.save_images_number

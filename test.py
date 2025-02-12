@@ -10,6 +10,7 @@ def parse_args():
     parser.add_argument("--batch_size", type=int, default=10)
     parser.add_argument('--gpu_ids', nargs='+', type=int, default=[0])
     parser.add_argument('--EC_path', type=str, default=None)
+    parser.add_argument('--dataset_path', type=str, default=None)
 
     a = parser.parse_args()
     g = a.gpu_ids
@@ -45,6 +46,7 @@ if message_length != args.message_length:
 
 # EC_path = "../checkpoints/MBRS_256_256/EC_" + str(model_epoch) + ".pth"
 EC_path = args.EC_path or "../output2_train_256x256/results/MBRS_m64__2025_01_26__18_26_06/models/EC_025.pth"
+ds_path = args.dataset_path
 print(f"cwd            : {os.getcwd()}")
 print(f"pid            : {os.getpid()}")
 print(f"host           : {os.uname().nodename}")
@@ -60,8 +62,11 @@ print(f"network.load_model_ed(EC_path)...")
 network.load_model_ed(EC_path)
 print(f"network.load_model_ed(EC_path)...Done")
 
-test_dataset = MBRSDataset(dataset_path, H, W, transform_type=1)
+test_dataset = MBRSDataset(ds_path, H, W, transform_type=1, return_ori_img=True)
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=0, pin_memory=True)
+print(f"dataset_path   : {ds_path}")
+print(f"H              : {H}")
+print(f"W              : {W}")
 print(f"test_dataset   : {len(test_dataset)}")
 print(f"test_dataloader: {len(test_dataloader)}")
 
