@@ -20,8 +20,9 @@ class EncoderDecoder(nn.Module):
 
 	def forward(self, image, message):
 		encoded_image = self.encoder(image, message)
-		noised_image = self.noise([encoded_image, image])
-		noised_image = self.upsample(noised_image)
+		# noised_image = self.noise([encoded_image, image])
+		upsample_img = self.upsample(encoded_image)
+		noised_image = self.noise([upsample_img, image])
 		noised_image = self.downsample(noised_image)
 		decoded_message = self.decoder(noised_image)
 		return encoded_image, noised_image, decoded_message

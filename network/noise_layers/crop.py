@@ -109,9 +109,14 @@ class TrainRandomCrop(nn.Module):
 
 	def __init__(self, ratio=1, target_size=0, proportional=True):
 		super(TrainRandomCrop, self).__init__()
+		print(f"TrainRandomCrop::__init__()...")
 		self.ratio = ratio
 		self.proportional = proportional
 		self.target_size = target_size
+		print(f"  ratio       : {self.ratio}")
+		print(f"  proportional: {self.proportional}")
+		print(f"  target_size : {self.target_size}")
+		print(f"TrainRandomCrop::__init__()...Done")
 
 	def forward(self, image_and_cover):
 		image, cover_image = image_and_cover

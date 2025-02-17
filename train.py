@@ -59,6 +59,7 @@ print(f"message_length : {message_length}")
 print(f"only_decoder   : {only_decoder}")
 print(f"epoch_number   : {epoch_number}")
 print(f"dataset_path   : {dataset_path}")
+print(f"noise_layers   : {noise_layers}")
 network = Network(H, W, message_length, noise_layers, device, batch_size,
                   lr, with_diffusion, only_decoder, gpu_ids=args.gpu_ids)
 
