@@ -33,7 +33,7 @@ class MBRSDataset(Dataset):
         else:
             raise ValueError(f"Invalid data_file_layout: {data_file_layout}")
         file_name_list.sort()
-        print(f"  total file cnt: {len(file_name_list)}")
+        print(f"  total file cnt  : {len(file_name_list)}")
         self.list = file_name_list
         if self.transform_type  == 2:
             # obsolete. just keep for possible usage in the future.

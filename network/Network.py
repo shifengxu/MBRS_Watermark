@@ -245,7 +245,7 @@ class Network:
 		self.load_model_dis(path_discriminator)
 
 	def load_model_ed(self, path_encoder_decoder: str):
-		self.encoder_decoder.module.load_state_dict(torch.load(path_encoder_decoder))
+		self.encoder_decoder.module.load_state_dict(torch.load(path_encoder_decoder, map_location=self.device))
 
 	def load_model_dis(self, path_discriminator: str):
 		self.discriminator.module.load_state_dict(torch.load(path_discriminator))
